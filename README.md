@@ -2,7 +2,7 @@
 
 A 3D surface plotting application that should work in any javascript-enabled web browser.
 
-The application reads x,y,z coordinates from a file and displays a colorful surface plot that can be rotated and zoomed.
+The application reads x,y,z coordinates from a file and displays a colorful surface plot that can be interactively rotated and zoomed.
 
 ## Screenshot
 
@@ -10,22 +10,18 @@ The application reads x,y,z coordinates from a file and displays a colorful surf
 
 ## Getting Started
 
-Open [plot3d.html](plot3d.html) in a browser and load a local file with 3D data points in CSV format.
+Open [plot3d.html](plot3d.html) in a browser and load 3D CSV data from a file. Data files can be dragged and dropped into the application if the host supports this.
 
-## Example data file
+## 3D Data File Format
 
-      # Example data file.
-      #
-      # The file name is used as the title of the plot.
-      #
-      # Comments and blank lines in the file are ignored.
-      #
-      # If the first CSV row contains 3 text strings these
-      # are used to label the three axis.
-      #
-      x-axis-label,y-axis-label,z-axis-label
-      0,0,0
-      1,1,1
+3D coordinates must be stored in CSV format in x,y,z order. Lines starting with '#' and blank lines are ignored. If the first CSV row contains 3 text strings these are used to label the x,y & z axis. The file name is used as the title of the plot.
+
+### Example 3D Data File
+
+      # Example 3D CSV data file.      
+      x-axis-label, y-axis-label, z-axis-label      
+      0, 0, 0
+      1.0, 2.1, 3.2
 
 ## License
 
