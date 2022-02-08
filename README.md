@@ -10,11 +10,10 @@ The application reads x,y,z coordinates from a file and displays a colorful surf
 
 ## Getting Started
 
-Open [plot3d.html](plot3d.html) in a browser and load 3D CSV data from a file.
+Open [plot3d.html](plot3d.html) in a browser and load 3D CSV data from a file. Data files can be dragged and dropped into the application if the host supports this.
 
 Use a mouse, or touch, to rotate, pan and zoom.
 
-Data files can be dragged and dropped into the application if the host supports this.
 
 ## 3D Data File Format
 
