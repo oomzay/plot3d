@@ -1,6 +1,6 @@
 ## Overview
 
-A 3D surface plotting application that should work in any javascript-enabled web browser.
+A single-page web app for interactively exploring 3D surfaces.
 
 The application reads x,y,z coordinates from a file and displays a colorful surface plot that can be interactively rotated and zoomed.
 
@@ -10,7 +10,11 @@ The application reads x,y,z coordinates from a file and displays a colorful surf
 
 ## Getting Started
 
-Open [plot3d.html](plot3d.html) in a browser and load 3D CSV data from a file. Data files can be dragged and dropped into the application if the host supports this.
+Open [plot3d.html](plot3d.html) in a browser and load 3D CSV data from a file.
+
+Use a mouse, or touch, to rotate, pan and zoom.
+
+Data files can be dragged and dropped into the application if the host supports this.
 
 ## 3D Data File Format
 
@@ -22,6 +26,7 @@ Open [plot3d.html](plot3d.html) in a browser and load 3D CSV data from a file. D
       x-axis-label, y-axis-label, z-axis-label      
       0, 0, 0
       1.0, 2.1, 3.2
+      2.3, 3.1, 4.2
 
 ## License
 
