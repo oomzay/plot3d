@@ -1,0 +1,64 @@
+# Example CSV input file
+#
+# Empty lines are ignored.
+# Lines starting with "#" are ignored.
+# Other lines must contain 3 csvs.
+# If the first, non-empty line contains non-numbers
+# they will be used as axis labels.
+#
+
+# X,Y,Z Axis Labels
+
+a,b,c
+
+# (x,y,z) Data points
+
+# Contour 0
+0,0,0
+0,1,0
+1,0,0
+1,1,0
+
+0.03,0.03,0.005
+0.03,0.97,0.005
+0.97,0.03,0.005
+0.97,0.97,0.005
+
+# Contour 1
+
+# This value has clean color change at c1
+#0.05,0.05,0.005
+#0.05,0.95,0.005
+#0.95,0.05,0.005
+#0.95,0.95,0.005
+
+# This value moves c0 c1 color transition into
+0.05,0.05,0.01
+0.05,0.95,0.01
+0.95,0.05,0.01
+0.95,0.95,0.01
+
+# Contour 2
+0.1,0.1,0.02
+0.1,0.9,0.02
+0.9,0.1,0.02
+0.9,0.9,0.02
+
+0.2,0.2,0.1
+0.2,0.8,0.1
+0.8,0.2,0.1
+0.8,0.8,0.1
+
+0.3,0.3,0.2
+0.3,0.7,0.2
+0.7,0.3,0.2
+0.7,0.7,0.2
+
+0.4,0.4,0.4
+0.4,0.6,0.4
+0.6,0.4,0.4
+0.6,0.6,0.4
+
+# Peak in the middle
+0.5,0.5,1
+

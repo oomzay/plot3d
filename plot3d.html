@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en"> 
+
+	<head>
+		<meta charset="utf-8"/>
+
+		<title>Plot3D - 3D Surface Plotter</title>
+
+        <!-- MIT license in format to keep LibreJS happy -->
+        <script>
+        /*    
+        @licstart  The following is the license notice for the code in this page.
+
+        Copyright (c) 2020, 2021, 2022 oomzay
+
+        Permission is hereby granted, free of charge, to any person obtaining a copy
+        of this software and associated documentation files (the "Software"), to deal
+        in the Software without restriction, including without limitation the rights
+        to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+        copies of the Software, and to permit persons to whom the Software is
+        furnished to do so, subject to the following conditions:
+
+        The above copyright notice and this permission notice shall be included in
+        all copies or substantial portions of the Software.
+
+        THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+        IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+        FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+        AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+        LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+        OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+        THE SOFTWARE.
+
+        @licend  The above is the license notice for the code in this page.
+        */
+        </script>
+        
+        <!-- Prevent hooligans, particularly mobile browsers, from deliberately 
+        trashing/re-scaling our carefully crafted, resolution-independant styling! 
+        -->
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		
+        <!-- 
+        Style to keep control space to a mimimum, and fill all remaining real 
+        estate with nice big 2.5d graph.
+        
+        Tested on several browsers:
+            firefox/windows/pc
+            ie/windows/pc
+            edge/windows/pc
+            chrome/windows/pc
+            chrome/android/s7
+            samsung internet/android/s7
+        -->
+		<style>
+			/*
+			Fill all available real estate.
+			
+			This requires a tussle with the slide-away nav bars 
+			in chrome mobile. But the reward is a full screen plot.
+			
+			Samsung Internet vh excludes the nav bars so vh is no 
+			different to 100% in that case :(
+			*/
+			html, body {
+				height: 100vh;
+				/* width: 100%; */
+				margin: 0;
+				padding: 0;
+			}
+
+			body {
+				display:flex; flex-direction:column;
+				font-family: Arial, Helvetica, sans-serif;
+				padding-left: 0.5em;
+				padding-right: 0.5em;
+			}
+			
+			header {
+				margin: 0;
+				padding: 0;
+				padding-top: 0.5em;
+			}
+
+			h1, h2, h3 {
+				margin: 0;
+			}
+			
+			#main {
+				flex-grow:1;
+				display:flex; flex-direction:column;
+
+			}
+			
+			/* Replace nasty browser-specific upload widgets with our own button */
+			input[type="file"] {
+				display: none;
+			}			
+			.custom-file-upload {
+				display: inline-block;				
+				border: 2px solid;
+				border-radius: 0.5em;
+				padding: 0.2em;
+				cursor: pointer;
+			}
+			
+			#main-div { 
+				flex-grow:1;
+				position: relative;
+				top: 0;
+				left: 0;
+				margin: 0;
+				margin-top: 0.5em;
+				margin-bottom: 0.5em;
+				border-style:solid;
+				border-width: 1px;
+			}
+			
+			#plot {
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+			}
+			
+			#status-div {
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				visibility: visible;
+				background-color: rgba(128, 128, 128, 0.5);
+			}
+			
+			#status {
+			  position: absolute;
+			  top: 50%;
+			  left: 50%;
+			  font-size: 2em;
+			  transform: translate(-50%,-50%);
+			  -ms-transform: translate(-50%,-50%);
+			}
+			
+			/* Div to keep related controls together if a line wraps */
+			.control-group-div {
+				display: inline-block;	
+				margin-right: 0.5em;
+			}
+			
+			/* Div to keep controls & label together if a line wraps*/
+			.control-div {
+				display: inline-block;	
+				margin-top: 0.5em;
+			}
+			
+		</style>
+
+	</head>
+	
+	<body>
+		
+		<!-- 
+        Static HTML composition
+        
+        Placing all the html before the scripts enables browsers to render the 
+        page displaying the initial "Loading library..." status, before the time 
+        consuming loading and parsing of the scripts begins.
+        -->
+		<div id="main" role="main">
+				
+			<form>			
+				<div class="control-group-div">
+					<div class="control-div">
+						<h3>Plot3D (v0.23.0)</h3>
+					</div>
+				</div>
+			
+				<div class="control-group-div">
+					<div class="control-group-div">
+						<div class="control-div">
+							<label class="custom-file-upload" for="file-selector">Load data</label>
+							<input type="file" id="file-selector" accept=".csv"/>
+						</div>
+					</div>
+					
+					<div class="control-group-div">
+					
+						<div class="control-div">
+							<input type="checkbox" id="show-colormap" name="show-colormap" checked>
+							<label for="show-colormap">Surface</label>
+						</div>
+						
+						<div class="control-div">
+							<input type="checkbox" id="show-datapoints" name="show-datapoints">
+							<label for="show-datapoints">Points</label>
+						</div>
+						
+						<div class="control-div">
+							<input type="checkbox" id="show-scale" name="show-scale">
+							<label for="show-scale">Scale</label>
+						</div>
+					</div>
+				</div>
+			</form>
+			
+			<div id="main-div">
+				<div id="plot"></div>
+				<div id="status-div">
+					<div id="status">Loading library...</div>
+				</div>		
+			</div>
+
+		</div>
+								
+		<!-- 
+        Scripts
+        
+        Placing scripts here, after all the static DOM content,
+        enables the static content to render before the browser 
+        parses the scripts. This is valid in HTML5.
+		-->
+        
+		<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>	
+		
+		<script>		
+			"use strict";
+			
+			/* Lookup UI elements */
+			const plotDiv = document.getElementById('plot');
+			const fileSelector = document.getElementById('file-selector');
+			const status_div = document.getElementById('status-div');
+			const status = document.getElementById('status');
+			const showColorCheck = document.getElementById('show-colormap');			
+			const showDataCheck = document.getElementById('show-datapoints');			
+			const showScaleCheck = document.getElementById('show-scale');			
+			
+			/* Create other resources */
+			const reader = new FileReader();				
+		
+			/** 
+			 * Parse 3D coords from CSV file content into x,y,z arrays
+			 * suitable as parameters to Plotly.
+			 *
+			 * File must contain numeric data in lines like: "x,y,z".
+			 *
+			 * If the first line contains 3 non-numbers these will be 
+			 * used as axis labels e.g. "x,y,z". Line breaks
+			 * are not supported in labels and there is no support
+			 * for escaping characters.
+			 *
+			 * Empty lines are ignored.
+			 *
+			 * Lines starting with "#" are ignored.
+			 *
+			 * This is NOT bullet proof!
+			 */
+			function parseCSV3D(csv)
+			{
+				let labels3d = {x: 'x', y: 'y', z: 'z'};
+				let data3D = {x: [], y: [], z: []};
+				let line_count = 0;
+				
+				function parseLine(line) 
+				{
+					/* Ignore empty lines */
+					if (line.length == 0) return;
+					
+					/* Ignore comment lines */
+					if (line.charAt(0) == '#') return;
+					
+					const fields = line.split(/,/);
+										
+					/* Ignore any lines without exactly 3 CS entries */
+					if (fields.length != 3) return;
+					
+					/* First valid line may have labels */
+					if (line_count == 0 && 
+						(isNaN(Number(fields[0])) || isNaN(Number(fields[1])) || isNaN(Number(fields[2]))))
+					{
+						labels3d.x = fields[0];
+						labels3d.y = fields[1];
+						labels3d.z = fields[2];
+					}
+					else
+					{
+						data3D.x.push(Number(fields[0]));
+						data3D.y.push(Number(fields[1]));
+						data3D.z.push(Number(fields[2]));
+					}
+					
+					line_count = line_count + 1;
+				}
+				
+				csv.split(/\r\n|\n/).forEach(parseLine);				
+				
+				return { labels: labels3d, data: data3D };
+			}
+
+			/**
+			 * Compare 2 numbers.
+			 *
+			 * For use in sorting functions.
+			 */
+			function cmpNums(a, b)
+			{
+				return a > b ? 1 : b > a ? -1 : 0;
+			}				
+			
+			/**
+			 * Generate weighted colorscale and data intensity values for use with plotly functions.
+			 *
+			 * Every input color span maps an equal number of the data values.
+			 */
+			function weightedNormalisedColorScale(data, colors)
+			{
+				/* This implementation creates a linear color scale and calculates the 
+                data "intensity" values that map the z values into the color spans.
+                
+                This complexity avoids the very odd shading artefacts seen when simply 
+                adjusting the scale to fit the data, especially for numerically tiny 
+                data values (~10e-5).
+                
+                I suspect these artefacts are due to rounding of the very small intensity 
+                values in the GPU pipeline.
+				*/
+				const sorted = data.slice().sort(cmpNums);
+				const min = sorted[0];
+				const max = sorted[sorted.length - 1];
+				const spanraw = max - min;
+				const span = spanraw ? spanraw : 1; // avoid 0!
+				const num_spans = colors.length - 1;
+				const colorspan = sorted.length / num_spans;
+			
+				/* Just make all color spans span equal sized normalised range */
+				/* Record the breakpoint values for normalising the data intensity */
+				const span_range = 1 / num_spans;
+				
+				let colorscale = [];
+				let colorbreaks = []; // denormalised!
+				let tickvals = [];
+				let ticktext = [];
+				
+				for (let c_i = 0; c_i < colors.length; ++c_i)
+				{
+					const intense = c_i / num_spans;
+					colorscale.push([intense.toString(), colors[c_i]]);
+					
+					// record the denormalise value of nearest sample
+					const s_i_raw = Math.floor(c_i * colorspan);						
+					const s_i = s_i_raw >= sorted.length ? sorted.length-1 : s_i_raw;
+					const v = sorted[s_i];
+					colorbreaks.push(v);
+					
+					// Set up the color scale
+					tickvals.push(intense);
+					ticktext.push(v.toExponential(2));
+				};
+				
+				/* Calculate intensity of a data value normalised w.r.t. the colorscale */
+				function normalise(val) {
+					// which color span does value map to?
+					let c_i = 0;
+					for(c_i = 0; c_i < colors.length - 1; ++c_i) {
+						if (val <= colorbreaks[c_i + 1]) break;
+					}
+					
+					// normalise value within the span
+					const span_start = colorbreaks[c_i];
+					const span_vrange_raw = colorbreaks[c_i + 1] - span_start;
+					const span_vrange = (span_vrange_raw == 0.0) ? 1 : span_vrange_raw; // spans can be all same value
+					const v_offset = val - span_start;
+					const v_scaled = v_offset / span_vrange;
+					const v_norm = (c_i + v_scaled) * span_range;
+					
+					return v_norm;
+				}
+				
+				/* Normalise all datapoint intensities w.r.t. the colorscale */
+				let intensity = [];
+				data.forEach(function(v){
+					intensity.push(normalise(v));
+				});
+				
+				return {
+					scale: colorscale, 
+					intensity: intensity, 
+					tickvals: tickvals,
+					ticktext: ticktext,
+				};
+			}
+			 
+			/**
+			 * Create a 3D plot of a 3D surface in the specified html element.
+			 *
+			 * z is assumed to be the normal axis.
+			 *
+			 * data3D = { x: [n], y: [n], z: [n] }
+			 */
+			function plot3D(title, labels, data, element, map_vis, data_vis, scale_vis)
+			{
+				// Psychadaelic Tropical Islands here we come...
+				const psychadaelia = weightedNormalisedColorScale(
+					data.z, 
+					['darkblue', 'blue', 'aqua', 'beige', 'green', 'yellow', 'orange', 'red', 'darkred']
+				);
+				
+				const mesh_trace =
+				{
+					type: 'mesh3d', 
+					visible: map_vis,
+					x: data.x, 
+					y: data.y, 
+					z: data.z,
+					colorscale: psychadaelia.scale,
+					intensity: psychadaelia.intensity,
+					flatshading: true,
+					showscale: scale_vis,
+					colorbar: {
+						title: labels.z,
+						tickvals: psychadaelia.tickvals,
+						ticktext: psychadaelia.ticktext,
+					},
+				};
+				
+				const scatter_trace = {
+					type: 'scatter3d',
+					visible: data_vis,
+					x: data.x, 
+					y: data.y, 
+					z: data.z,
+					mode: 'markers',
+					marker: 
+					{
+						color: 'black',
+						size: 2,
+						symbol: 'circle'
+					},
+				};
+
+				Plotly.newPlot(
+					// target element
+					element, 
+					// traces
+					[
+						mesh_trace,
+						scatter_trace
+					],
+					// layout
+					{ 
+						height: element.clientHeight,
+						margin: {
+							l: 0,
+							r: 0,
+							t: 40,
+							b: 0,
+						},
+						title: { 
+							text: title,
+							yref: "paper",
+							y : 1,
+							yanchor : "bottom"   
+						},
+						scene: {
+							xaxis: { title: { text: labels.x } },
+							yaxis: { title: { text: labels.y } },
+							zaxis: { title: { text: labels.z } },
+						},
+					},
+					// config
+					{
+						responsive: true,
+						displaylogo: false,
+						modeBarButtonsToRemove: ["orbitRotation", "resetCameraLastSave3d"],
+					}
+				);
+			}
+
+			/**
+			 * Enter new, potentially long running state. (Helper)
+			 *
+			 * Updates status and excutes the new state function after a short 
+			 * delay to ensure the status line gets updated.
+			 */
+			function newState(msg, fn)
+			{
+				if (msg) {
+					status.innerText = msg;
+					status_div.style.visibility = "visible";
+				} else {
+					status_div.style.visibility = "hidden";
+				}
+				
+				if (fn) {
+					// Seems we need to delay at least one frame or the script 
+					// may start running again before UI changes are rendered. 
+					// requestAnimationFrame() doesnt cut it reliably either for 
+					// same reason.
+					// 25ms allows for 50hz displays
+					window.setTimeout(fn, 25); 
+				}
+			}
+			
+			/**
+			 * Parse 3D coords from selected CSV file and plot it.
+			 */
+			function loadFile(file)
+			{
+				// Configure file reader to parse 3d data from a file and plot it when it loads.
+				reader.onload = function(e) 
+				{
+					// HERE: This is not robust. E.g. some mobile browsers don't implement
+					// the .csv file extension filter. Some files might not have a "." in at all.
+					const title = file.name ? file.name.substring(0, file.name.indexOf(".")) : "Plot";				
+					
+					newState("Parsing CSV...", function() {
+						const data3D = parseCSV3D(e.target.result);
+						
+						newState("Plotting data...", function() {
+							plot3D(title, data3D.labels, data3D.data, plotDiv, 
+								showColorCheck.checked, 
+								showDataCheck.checked,
+								showScaleCheck.checked
+							);	
+							newState();
+						});
+					});
+				};				
+				
+				// Clear the existing plot and start the load 
+				// (completion is handled by .onload asynchronously)
+				Plotly.purge(plotDiv);
+				newState("Loading data...", function() {
+					reader.readAsText(file);
+				});
+			}
+
+			/**
+			 * Event handler used to prevent (drag) events propagating
+			 * outside target element.
+			 */
+			function preventDefaults (e) {
+				e.preventDefault()
+				e.stopPropagation()
+			}
+			
+			function dropHandler(ev) {
+			  if (ev.dataTransfer.items) {
+			    // Use DataTransferItemList interface to access the file(s)
+				if (ev.dataTransfer.items.length == 1) {
+				  // If dropped items aren't files, reject them
+				  if (ev.dataTransfer.items[0].kind === 'file') {
+					loadFile(ev.dataTransfer.items[0].getAsFile());
+				  }
+				}
+			  } else {
+				// Use DataTransfer interface to access the file(s)
+				if (ev.dataTransfer.files.length == 1) {
+					loadFile(ev.dataTransfer.files[0]);
+				}
+			  }
+			}
+				
+			/**
+			 * Parse 3D coords from selected CSV file and plot it.
+			 */
+			function onFileSelectionChange(e)
+			{
+				// Retreive the first (only) file object from the file selection event.
+				const file = e.target.files[0];
+				if (file) loadFile(file);
+			}
+			
+			function onShowColorMapChanged(event) {
+				const checkbox = event.target;
+				if (plotDiv.data) {
+					newState("Updating plot...", function() {
+						Plotly.restyle(plotDiv, {'visible': checkbox.checked,}, 0);
+						newState();					
+					});				
+				}
+			}
+
+			function onShowDataPointsChanged(event) {
+				const checkbox = event.target;
+				if (plotDiv.data) {
+					newState("Updating plot...", function() {
+						Plotly.restyle(plotDiv, {'visible': checkbox.checked}, 1);
+						newState();					
+					});				
+				}
+			}
+
+			function onShowScaleChanged(event) {
+				const checkbox = event.target;
+				if (plotDiv.data) {
+					newState("Updating plot...", function() {
+						Plotly.restyle(plotDiv, {showscale: checkbox.checked,}, 0);
+						newState();					
+					});				
+				}
+			}
+				
+			/* Connect UI events to handlers */
+			fileSelector.addEventListener('change', onFileSelectionChange, false);
+			showColorCheck.addEventListener('change', onShowColorMapChanged, false);
+			showDataCheck.addEventListener('change', onShowDataPointsChanged, false);
+			showScaleCheck.addEventListener('change', onShowScaleChanged, false);
+			
+			/* Handle file drag and drop */
+			;['dragenter', 'dragover', 'dragleave', 'drop'].forEach(function(ename){
+				document.body.addEventListener(ename, preventDefaults, false)
+			});
+			document.body.addEventListener('drop', dropHandler, false)
+			
+            /* Indicate that now ready for user to load a data set */
+			newState("(no data)");
+		</script>
+	</body>
+</html>
