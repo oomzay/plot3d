@@ -31,11 +31,11 @@ Any lines starting with '#' and blank lines are ignored.
 
 ## Issues and Requests
 
-Please report any issues and make any requests on the development site: https://github.com/oomzay/plot3d/issues
+Please report any issues and make any requests on the development site: [https://github.com/oomzay/plot3d/issues](https://github.com/oomzay/plot3d/issues)
 
 ## Developers
 
-If you want to contribute or clone please visit the development site: https://github.com/oomzay/plot3d
+If you want to contribute or clone please visit the development site: [https://github.com/oomzay/plot3d](https://github.com/oomzay/plot3d)
 
 ## License
 
