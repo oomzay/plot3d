@@ -25,7 +25,7 @@ If the first CSV row contains text, rather than numbers, then the values from th
       x-label,y-label,z-label      
       0,0,0
       1.0,2.1,3.2
-      2.3,3.1,4.2 and issues
+      2.3,3.1,4.2
 
 Any lines starting with '#' and blank lines are ignored.
 
