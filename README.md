@@ -25,9 +25,17 @@ The x,y,z coordinates must be in (UTF-8) CSV format. Many applications can outpu
       x-label,y-label,z-label      
       0,0,0
       1.0,2.1,3.2
-      2.3,3.1,4.2
+      2.3,3.1,4.2 and issues
 
 Any lines starting with '#' and blank lines are ignored.
+
+## Issues and Requests
+
+Please report any issues and make any requests on the development site: https://github.com/oomzay/plot3d/issues
+
+## Developers
+
+If you want to contribute or clone please visit the development site: https://github.com/oomzay/plot3d
 
 ## License
 
