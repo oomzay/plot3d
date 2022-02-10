@@ -14,11 +14,11 @@ Just open [plot3d.html](plot3d.html) in a browser and load a dataset. Use a mous
 
 Dataset files can be dragged and dropped into the application if the host supports this. 
 
-## Dataset File
+## Dataset File Format
 
-The dataset file name is used as the title of the model.
+The x,y,z coordinates must be in (UTF-8) CSV format. Many applications can output data in this format.
 
-The x,y,z coordinates must be in (UTF-8) CSV format. Many applications can output data in this format. If the first CSV row contains text, rather than numbers, then the values from that row are used to label the x,y & z axes. 
+If the first CSV row contains text, rather than numbers, then the values from that row are used to label the x,y & z axes. 
 
 ### Example Dataset File
 
@@ -28,6 +28,8 @@ The x,y,z coordinates must be in (UTF-8) CSV format. Many applications can outpu
       2.3,3.1,4.2 and issues
 
 Any lines starting with '#' and blank lines are ignored.
+
+The dataset file name is used as the title of the model.
 
 ## Issues and Requests
 
