@@ -37,7 +37,7 @@ Please report any issues and make any requests on the development site: [https:/
 
 ## Developers
 
-If you want to contribute or clone please visit the development site: [https://github.com/oomzay/plot3d](https://github.com/oomzay/plot3d)
+If you want to contribute please visit the development site: [https://github.com/oomzay/plot3d](https://github.com/oomzay/plot3d)
 
 ## License
 
