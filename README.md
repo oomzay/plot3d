@@ -1,8 +1,8 @@
 ## Overview
 
-[A web app for visualising 2.5D datasets](plot3d.html).
+[WebApp for visualising 2.5D datasets](plot3d.html).
 
-The app reads x,y,z coordinates from a CSV file and presents a colorful 3D model of the z-surface that can be rotated, zoomed and panned.
+Reads x,y,z coordinates from a CSV file and presents a colorful 3D model of the z-surface that can be rotated, zoomed and panned.
 
 ## Screenshot
 
@@ -10,9 +10,9 @@ The app reads x,y,z coordinates from a CSV file and presents a colorful 3D model
 
 ## Getting Started
 
-Just open [plot3d.html](plot3d.html) in a browser and load a dataset. Use a mouse or touch to navigate the 3D model.
+Open [plot3d.html](plot3d.html) in a browser and load a dataset. Use a mouse or touch to navigate the 3D model.
 
-Dataset files can be dragged and dropped into the application if the host supports this. 
+Dataset files can also be dragged and dropped into the webapp if the host supports this. 
 
 ## Dataset File Format
 
